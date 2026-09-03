@@ -650,12 +650,8 @@
       isolation: isolate;
     }
 
-    .gallery-item:nth-child(-n + 3) {
+    .gallery-item:nth-child(n) {
       grid-column: span 2;
-    }
-
-    .gallery-item:nth-child(n + 4) {
-      grid-column: span 3;
     }
 
     .gallery-item img {
@@ -668,7 +664,8 @@
     .gallery-item:nth-child(2) img,
     .gallery-item:nth-child(3) img,
     .gallery-item:nth-child(4) img,
-    .gallery-item:nth-child(5) img {
+    .gallery-item:nth-child(5) img,
+    .gallery-item:nth-child(6) img {
       object-fit: contain;
       background: linear-gradient(145deg, #22142e, #110d18);
     }
@@ -1163,6 +1160,10 @@
           <figure class="gallery-item reveal">
             <img src="assets/fan-art-05.png" alt="Colorful illustrated group portrait" loading="lazy">
             <figcaption class="gallery-caption"><span>Together</span><span>Fan art 05</span></figcaption>
+          </figure>
+          <figure class="gallery-item reveal">
+            <img src="assets/fan-art-06.png" alt="Illustrated character collage featuring Zeyn and friends" loading="lazy">
+            <figcaption class="gallery-caption"><span>Character collection</span><span>Fan art 06</span></figcaption>
           </figure>
         </div>
       </div>
