@@ -889,6 +889,31 @@
       transform: translate(-50%, 0);
     }
 
+    .music-button {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 60;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 13px 18px;
+      color: #fff;
+      background: linear-gradient(135deg, #49305c, #24192f);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.9rem;
+      font-weight: 760;
+    }
+
+    .music-button:hover,
+    .music-button[aria-pressed="true"] {
+      background: linear-gradient(135deg, #704881, #3c284d);
+    }
+
     :focus-visible {
       outline: 3px solid rgba(79, 215, 219, 0.8);
       outline-offset: 4px;
@@ -1051,6 +1076,11 @@
       .footer-inner {
         align-items: flex-start;
         flex-direction: column;
+      }
+
+      .music-button {
+        right: 14px;
+        bottom: 14px;
       }
     }
 
@@ -1317,6 +1347,10 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <button class="music-button" id="musicButton" type="button" aria-pressed="false" aria-label="Play peaceful music">
+    <span aria-hidden="true">♫</span><span id="musicButtonText">Play music</span>
+  </button>
+
   <dialog class="drawing-dialog" id="drawingDialog" aria-labelledby="drawingDialogTitle">
     <div class="drawing-dialog-content">
       <div class="drawing-dialog-image">
@@ -1336,6 +1370,8 @@
     const menuButton = document.getElementById('menuButton');
     const navLinks = document.getElementById('navLinks');
     const toast = document.getElementById('toast');
+    const musicButton = document.getElementById('musicButton');
+    const musicButtonText = document.getElementById('musicButtonText');
     const drawingDialog = document.getElementById('drawingDialog');
     const drawingDialogImage = document.getElementById('drawingDialogImage');
     const drawingDialogTitle = document.getElementById('drawingDialogTitle');
@@ -1374,6 +1410,80 @@
       toast.classList.add('show');
       toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1900);
     }
+
+    // A quiet, original melody made with the browser's audio tools.
+    // Sound starts only after a visitor presses the button.
+    let musicContext;
+    let musicVolume;
+    let musicTimer;
+    let nextMusicTime;
+    let chordIndex = 0;
+    const beatLength = 60 / 72;
+    const chords = [
+      { harmony: [261.63, 329.63, 392.00], melody: [523.25, 493.88, 392.00, 329.63] },
+      { harmony: [220.00, 261.63, 329.63], melody: [440.00, 392.00, 329.63, 261.63] },
+      { harmony: [174.61, 220.00, 261.63], melody: [349.23, 392.00, 440.00, 392.00] },
+      { harmony: [196.00, 261.63, 293.66], melody: [392.00, 329.63, 293.66, 261.63] }
+    ];
+
+    function playTone(frequency, start, duration, volume) {
+      const oscillator = musicContext.createOscillator();
+      const envelope = musicContext.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(frequency, start);
+      envelope.gain.setValueAtTime(0, start);
+      envelope.gain.linearRampToValueAtTime(volume, start + 0.08);
+      envelope.gain.exponentialRampToValueAtTime(0.001, start + duration);
+      oscillator.connect(envelope);
+      envelope.connect(musicVolume);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.02);
+    }
+
+    function scheduleMusic() {
+      while (nextMusicTime < musicContext.currentTime + 0.3) {
+        const chord = chords[chordIndex];
+        chord.harmony.forEach((note) => playTone(note, nextMusicTime, beatLength * 3.8, 0.045));
+        chord.melody.forEach((note, beat) => {
+          playTone(note, nextMusicTime + beat * beatLength, beatLength * 1.25, 0.075);
+        });
+        nextMusicTime += beatLength * 4;
+        chordIndex = (chordIndex + 1) % chords.length;
+      }
+    }
+
+    musicButton.addEventListener('click', async () => {
+      if (musicContext) {
+        window.clearInterval(musicTimer);
+        const oldContext = musicContext;
+        musicVolume.gain.setTargetAtTime(0, oldContext.currentTime, 0.08);
+        musicContext = null;
+        window.setTimeout(() => oldContext.close(), 350);
+        musicButton.setAttribute('aria-pressed', 'false');
+        musicButton.setAttribute('aria-label', 'Play peaceful music');
+        musicButtonText.textContent = 'Play music';
+        return;
+      }
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) {
+        showToast('Music is not supported in this browser.');
+        return;
+      }
+
+      musicContext = new AudioContextClass();
+      musicVolume = musicContext.createGain();
+      musicVolume.gain.value = 0.55;
+      musicVolume.connect(musicContext.destination);
+      await musicContext.resume();
+      nextMusicTime = musicContext.currentTime + 0.05;
+      chordIndex = 0;
+      scheduleMusic();
+      musicTimer = window.setInterval(scheduleMusic, 100);
+      musicButton.setAttribute('aria-pressed', 'true');
+      musicButton.setAttribute('aria-label', 'Pause peaceful music');
+      musicButtonText.textContent = 'Pause music';
+    });
 
     document.querySelectorAll('.creator-card').forEach((card) => {
       const creator = card.dataset.creator;
