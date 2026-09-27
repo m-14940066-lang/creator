@@ -227,10 +227,24 @@
     }
 
     .gradient-text {
+      display: inline-block;
+      position: relative;
       color: transparent;
       background: linear-gradient(98deg, #ff5d6e 4%, #f66abb 47%, #9777ff 92%);
       background-clip: text;
       -webkit-background-clip: text;
+      filter: drop-shadow(3px 3px 0 rgba(79, 215, 219, 0.22));
+      animation: title-chaos 4.8s steps(1, end) infinite;
+    }
+
+    @keyframes title-chaos {
+      0%, 44%, 48%, 82%, 86%, 100% { transform: translate(0) rotate(0); }
+      45% { transform: translate(-3px, 2px) rotate(-1deg); }
+      46% { transform: translate(4px, -1px) rotate(1deg); }
+      47% { transform: translate(-1px, -2px); }
+      83% { transform: translate(2px, 1px) skewX(-5deg); }
+      84% { transform: translate(-2px, -1px) skewX(5deg); }
+      85% { transform: translate(0); }
     }
 
     .hero-copy {
@@ -654,6 +668,16 @@
       grid-column: span 2;
     }
 
+    .gallery-item:nth-child(3n + 1) { rotate: -1.2deg; }
+    .gallery-item:nth-child(3n + 2) { rotate: 1.4deg; translate: 0 9px; }
+    .gallery-item:nth-child(3n) { rotate: -0.5deg; translate: 0 -5px; }
+
+    .gallery-item:hover {
+      z-index: 3;
+      rotate: 0deg;
+      scale: 1.025;
+    }
+
     .gallery-item img {
       width: 100%;
       height: 100%;
@@ -736,6 +760,19 @@
       box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
       cursor: pointer;
       text-align: left;
+      transition: rotate 250ms ease, scale 250ms ease, box-shadow 250ms ease;
+    }
+
+    .drawing-button:nth-child(3n + 1) { rotate: -1.5deg; }
+    .drawing-button:nth-child(3n + 2) { rotate: 1.7deg; translate: 0 8px; }
+    .drawing-button:nth-child(3n) { rotate: -0.7deg; translate: 0 -4px; }
+
+    .drawing-button:hover,
+    .drawing-button:focus-visible {
+      z-index: 3;
+      rotate: 0deg;
+      scale: 1.035;
+      box-shadow: 0 25px 70px rgba(239, 74, 168, 0.3);
     }
 
     .drawing-button img {
@@ -912,6 +949,66 @@
     .music-button:hover,
     .music-button[aria-pressed="true"] {
       background: linear-gradient(135deg, #704881, #3c284d);
+    }
+
+    main,
+    footer {
+      position: relative;
+      z-index: 1;
+    }
+
+    .chaos-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .chaos-piece {
+      position: absolute;
+      color: var(--piece-color, #ff6f9e);
+      font-size: clamp(1.4rem, 3vw, 3rem);
+      font-weight: 900;
+      opacity: 0.38;
+      text-shadow: 0 0 22px currentColor;
+      animation: chaos-drift var(--speed, 8s) ease-in-out infinite alternate;
+    }
+
+    .chaos-piece:nth-child(1) { top: 12%; left: 3%; --piece-color: #ff5571; --speed: 7s; }
+    .chaos-piece:nth-child(2) { top: 26%; right: 4%; --piece-color: #5be2e7; --speed: 9s; }
+    .chaos-piece:nth-child(3) { top: 53%; left: 5%; --piece-color: #a485ff; --speed: 6s; }
+    .chaos-piece:nth-child(4) { top: 72%; right: 6%; --piece-color: #ff75be; --speed: 8s; }
+    .chaos-piece:nth-child(5) { top: 88%; left: 8%; --piece-color: #5be2e7; --speed: 10s; }
+    .chaos-piece:nth-child(6) { top: 9%; right: 17%; --piece-color: #ffd05d; --speed: 7.5s; }
+    .chaos-piece:nth-child(7) { top: 39%; left: 14%; --piece-color: #ff75be; --speed: 11s; }
+    .chaos-piece:nth-child(8) { top: 61%; right: 15%; --piece-color: #ffd05d; --speed: 6.5s; }
+    .chaos-piece:nth-child(9) { top: 81%; right: 25%; --piece-color: #a485ff; --speed: 8.5s; }
+    .chaos-piece:nth-child(10) { top: 18%; left: 24%; --piece-color: #5be2e7; --speed: 9.5s; }
+    .chaos-piece:nth-child(11) { top: 45%; right: 27%; --piece-color: #ff5571; --speed: 7s; }
+    .chaos-piece:nth-child(12) { top: 93%; left: 46%; --piece-color: #ffd05d; --speed: 10s; }
+
+    @keyframes chaos-drift {
+      0% { transform: translate(0, 0) rotate(-12deg) scale(0.9); }
+      50% { transform: translate(18px, -22px) rotate(12deg) scale(1.12); }
+      100% { transform: translate(-12px, 15px) rotate(-7deg) scale(0.98); }
+    }
+
+    .chaos-spark {
+      position: fixed;
+      z-index: 200;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      background: var(--spark-color);
+      border-radius: 3px;
+      box-shadow: 0 0 13px var(--spark-color);
+      animation: spark-pop 720ms ease-out forwards;
+    }
+
+    @keyframes spark-pop {
+      from { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(1); }
+      to { opacity: 0; transform: translate(var(--spark-x), var(--spark-y)) rotate(220deg) scale(0.2); }
     }
 
     :focus-visible {
@@ -1115,6 +1212,15 @@
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <div class="chaos-layer" aria-hidden="true">
+    <span class="chaos-piece">✦</span><span class="chaos-piece">♡</span>
+    <span class="chaos-piece">★</span><span class="chaos-piece">✿</span>
+    <span class="chaos-piece">✧</span><span class="chaos-piece">⚡</span>
+    <span class="chaos-piece">☾</span><span class="chaos-piece">♡</span>
+    <span class="chaos-piece">✦</span><span class="chaos-piece">★</span>
+    <span class="chaos-piece">✿</span><span class="chaos-piece">✧</span>
+  </div>
 
   <header class="site-header" id="siteHeader">
     <nav class="nav container" aria-label="Main navigation">
@@ -1465,8 +1571,30 @@
       });
     });
 
+    function burstSparkles(button) {
+      const rect = button.getBoundingClientRect();
+      const originX = rect.left + rect.width / 2;
+      const originY = rect.top + rect.height / 2;
+      const colors = ['#ff5571', '#ff75be', '#a485ff', '#5be2e7', '#ffd05d'];
+
+      for (let index = 0; index < 18; index += 1) {
+        const spark = document.createElement('span');
+        const angle = (Math.PI * 2 * index) / 18;
+        const distance = 65 + Math.random() * 95;
+        spark.className = 'chaos-spark';
+        spark.style.left = `${originX}px`;
+        spark.style.top = `${originY}px`;
+        spark.style.setProperty('--spark-x', `${Math.cos(angle) * distance}px`);
+        spark.style.setProperty('--spark-y', `${Math.sin(angle) * distance}px`);
+        spark.style.setProperty('--spark-color', colors[index % colors.length]);
+        document.body.appendChild(spark);
+        window.setTimeout(() => spark.remove(), 760);
+      }
+    }
+
     document.querySelectorAll('.drawing-button').forEach((button) => {
       button.addEventListener('click', () => {
+        burstSparkles(button);
         const image = button.querySelector('img');
         drawingDialogImage.src = image.src;
         drawingDialogImage.alt = image.alt;
